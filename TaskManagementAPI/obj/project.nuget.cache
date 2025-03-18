@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "dgSpecHash": "edcVIwLmdM63Hhhn1ABhxhqZ1LnBd4YveWBHuqW47iB+6frfKs1xwyYylxyOQrCCtHqGW3j7AoSL+lx62OcQYA==",
+  "dgSpecHash": "KY8x/YIHQeC62z9yqDunLPphzO/ClBSz8AVicSld42PNUBRRqqH6Iz3jUVvZMDnSonqb+LBNylfqAAPmRBi70g==",
   "success": true,
   "projectFilePath": "C:\\Users\\onyedika.ezeamama\\Documents\\GitHub\\TaskManagementAPI\\TaskManagementAPI\\TaskManagementAPI.csproj",
   "expectedPackageFiles": [
@@ -68,7 +68,7 @@
     "C:\\Users\\onyedika.ezeamama\\.nuget\\packages\\newtonsoft.json\\9.0.1\\newtonsoft.json.9.0.1.nupkg.sha512",
     "C:\\Users\\onyedika.ezeamama\\.nuget\\packages\\pipelines.sockets.unofficial\\2.2.8\\pipelines.sockets.unofficial.2.2.8.nupkg.sha512",
     "C:\\Users\\onyedika.ezeamama\\.nuget\\packages\\rabbitmq.client\\6.8.1\\rabbitmq.client.6.8.1.nupkg.sha512",
-    "C:\\Users\\onyedika.ezeamama\\.nuget\\packages\\serilog\\4.0.0\\serilog.4.0.0.nupkg.sha512",
+    "C:\\Users\\onyedika.ezeamama\\.nuget\\packages\\serilog\\4.2.0\\serilog.4.2.0.nupkg.sha512",
     "C:\\Users\\onyedika.ezeamama\\.nuget\\packages\\serilog.aspnetcore\\6.1.0\\serilog.aspnetcore.6.1.0.nupkg.sha512",
     "C:\\Users\\onyedika.ezeamama\\.nuget\\packages\\serilog.extensions.hosting\\5.0.1\\serilog.extensions.hosting.5.0.1.nupkg.sha512",
     "C:\\Users\\onyedika.ezeamama\\.nuget\\packages\\serilog.extensions.logging\\3.1.0\\serilog.extensions.logging.3.1.0.nupkg.sha512",

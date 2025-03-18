@@ -17,7 +17,6 @@ Log.Logger = new LoggerConfiguration()
 
 // Add services to the container.
 builder.Services.AddControllers();
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(options =>
 {
@@ -37,7 +36,14 @@ builder.Services.AddSwaggerGen(options =>
 builder.Services.AddStackExchangeRedisCache(options =>
 {
     options.Configuration = builder.Configuration.GetValue<string>("Redis:ConnectionString");
-    options.InstanceName = "TaskManagement_";  // Optional: Set an instance name if needed
+    options.InstanceName = "TaskManagement_"; 
+});
+
+// Register IConnectionMultiplexer to access Redis
+builder.Services.AddSingleton<IConnectionMultiplexer>(sp =>
+{
+    var redisConnectionString = builder.Configuration.GetValue<string>("Redis:ConnectionString");
+    return ConnectionMultiplexer.Connect(redisConnectionString);
 });
 
 // Configure Database Context
@@ -63,5 +69,7 @@ app.UseHttpsRedirection();
 app.UseAuthorization();
 
 app.MapControllers();
+
+Log.Information("Task Management API has started successfully.");
 
 app.Run();

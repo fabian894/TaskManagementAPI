@@ -1414,7 +1414,7 @@
           }
         }
       },
-      "Serilog/4.0.0": {
+      "Serilog/4.2.0": {
         "type": "package",
         "compile": {
           "lib/net6.0/Serilog.dll": {
@@ -2728,6 +2728,7 @@
           "Moq": "4.20.72",
           "Newtonsoft.Json": "9.0.1",
           "RabbitMQ.Client": "6.8.1",
+          "Serilog": "4.2.0",
           "Serilog.AspNetCore": "6.1.0",
           "Serilog.Sinks.File": "6.0.0",
           "StackExchange.Redis": "2.8.31",
@@ -4802,10 +4803,10 @@
         "rabbitmq.client.nuspec"
       ]
     },
-    "Serilog/4.0.0": {
-      "sha512": "2jDkUrSh5EofOp7Lx5Zgy0EB+7hXjjxE2ktTb1WVQmU00lDACR2TdROGKU0K1pDTBSJBN1PqgYpgOZF8mL7NJw==",
+    "Serilog/4.2.0": {
+      "sha512": "gmoWVOvKgbME8TYR+gwMf7osROiWAURterc6Rt2dQyX7wtjZYpqFiA/pY6ztjGQKKV62GGCyOcmtP1UKMHgSmA==",
       "type": "package",
-      "path": "serilog/4.0.0",
+      "path": "serilog/4.2.0",
       "files": [
         ".nupkg.metadata",
         ".signature.p7s",
@@ -4819,9 +4820,11 @@
         "lib/net6.0/Serilog.xml",
         "lib/net8.0/Serilog.dll",
         "lib/net8.0/Serilog.xml",
+        "lib/net9.0/Serilog.dll",
+        "lib/net9.0/Serilog.xml",
         "lib/netstandard2.0/Serilog.dll",
         "lib/netstandard2.0/Serilog.xml",
-        "serilog.4.0.0.nupkg.sha512",
+        "serilog.4.2.0.nupkg.sha512",
         "serilog.nuspec"
       ]
     },
