@@ -110,7 +110,6 @@ namespace TaskManagementAPI.Controllers
 
             var newTaskStatus = (TaskStatus)newStatus;
 
-            // Determine the trigger based on status change
             TaskTrigger? trigger = null;
 
             if (task.Status == TaskStatus.Pending && newTaskStatus == TaskStatus.InProgress)

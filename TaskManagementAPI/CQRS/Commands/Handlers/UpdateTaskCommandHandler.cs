@@ -40,7 +40,6 @@ namespace TaskManagementAPI.CQRS.Handlers
 
             await _context.SaveChangesAsync();
 
-            
             await _cache.KeyDeleteAsync($"task_{request.Id}");
             await _cache.KeyDeleteAsync("all_tasks");
 

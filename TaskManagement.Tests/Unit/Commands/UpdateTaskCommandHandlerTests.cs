@@ -30,7 +30,7 @@ namespace TaskManagement.Tests.Commands
             var dbMock = new Mock<IDatabase>();
             redisMock.Setup(r => r.GetDatabase(It.IsAny<int>(), It.IsAny<object>())).Returns(dbMock.Object);
 
-            _handler = new UpdateTaskCommandHandler(_context, redisMock.Object); 
+            _handler = new UpdateTaskCommandHandler(_context, redisMock.Object); // Pass mock to the handler
 
             _context.Tasks.Add(new TaskEntity
             {
