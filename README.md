@@ -52,6 +52,8 @@ iii. Factory Pattern (for Creating Tasks)
 The CreateTaskCommandHandler was designed to instantiate and return a new TaskEntity.
 This can later be extended to use a factory for better object creation logic.
 
+iv. Logging/Debugging: Implemented logging using a tool like Serilog, with output to a file in logs/taskmanagement.log in the file directory. Check the program.cs for the configuration implementation
+
 **State Management**
 The API follows a stateless approach, meaning:
 
