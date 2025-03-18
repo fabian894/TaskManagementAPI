@@ -1,7 +1,10 @@
-﻿using System.Threading;
+﻿using System;
+using System.Threading;
 using System.Threading.Tasks;
 using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
+using Moq;
+using StackExchange.Redis;
 using TaskManagementAPI.CQRS.Commands;
 using TaskManagementAPI.CQRS.Handlers;
 using TaskManagementAPI.Data;
@@ -22,13 +25,17 @@ namespace TaskManagement.Tests.Commands
                 .Options;
 
             _dbContext = new ApplicationDbContext(options);
-            _handler = new CreateTaskCommandHandler(_dbContext);
+
+            var redisMock = new Mock<IConnectionMultiplexer>();
+            var dbMock = new Mock<IDatabase>();
+            redisMock.Setup(r => r.GetDatabase(It.IsAny<int>(), It.IsAny<object>())).Returns(dbMock.Object);
+
+            _handler = new CreateTaskCommandHandler(_dbContext, redisMock.Object);
         }
 
         [Fact]
         public async Task Handle_ShouldCreateTask_WhenValidRequestIsGiven()
         {
-            // Arrange
             var command = new CreateTaskCommand(
                 "Test Task",
                 "Test Description",

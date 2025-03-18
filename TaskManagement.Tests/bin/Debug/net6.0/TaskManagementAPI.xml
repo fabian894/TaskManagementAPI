@@ -1,0 +1,43 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>TaskManagementAPI</name>
+    </assembly>
+    <members>
+        <member name="M:TaskManagementAPI.Controllers.TaskController.CreateTask(TaskManagementAPI.Models.TaskEntity)">
+            <summary>
+            Creates a new task.
+            </summary>
+            <param name="task">The task entity to create.</param>
+            <returns>The created task.</returns>
+        </member>
+        <member name="M:TaskManagementAPI.Controllers.TaskController.GetAllTasks">
+            <summary>
+            Retrieves all tasks.
+            </summary>
+            <returns>A list of all tasks.</returns>
+        </member>
+        <member name="M:TaskManagementAPI.Controllers.TaskController.GetTaskById(System.Int32)">
+            <summary>
+            Retrieves a task by ID.
+            </summary>
+            <param name="id">The ID of the task.</param>
+            <returns>The task if found, otherwise 404.</returns>
+        </member>
+        <member name="M:TaskManagementAPI.Controllers.TaskController.UpdateTaskStatus(System.Int32,System.Int32)">
+            <summary>
+            Updates the status of a task.
+            </summary>
+            <param name="id">The ID of the task.</param>
+            <param name="trigger">The transition trigger.</param>
+            <returns>The updated task status.</returns>
+        </member>
+        <member name="M:TaskManagementAPI.Controllers.TaskController.DeleteTask(System.Int32)">
+            <summary>
+            Deletes a task by ID.
+            </summary>
+            <param name="id">The ID of the task to delete.</param>
+            <returns>No content on successful deletion.</returns>
+        </member>
+    </members>
+</doc>

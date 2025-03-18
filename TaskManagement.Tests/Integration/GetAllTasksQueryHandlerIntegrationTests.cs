@@ -5,6 +5,8 @@ using System.Threading.Tasks;
 using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using Moq;
+using StackExchange.Redis;
 using TaskManagementAPI.CQRS.Queries;
 using TaskManagementAPI.CQRS.Queries.Handlers;
 using TaskManagementAPI.Data;
@@ -13,12 +15,13 @@ using Xunit;
 
 namespace TaskManagement.Tests.Integration
 {
-    public class GetTaskByIdQueryHandlerIntegrationTests : IDisposable
+    public class GetAllTasksQueryHandlerIntegrationTests : IDisposable
     {
         private readonly ApplicationDbContext _context;
-        private readonly GetTaskByIdQueryHandler _handler;
+        private readonly GetAllTasksQueryHandler _handler;
+        private readonly Mock<IConnectionMultiplexer> _redisMock;
 
-        public GetTaskByIdQueryHandlerIntegrationTests()
+        public GetAllTasksQueryHandlerIntegrationTests()
         {
             var serviceProvider = new ServiceCollection()
                 .AddDbContext<ApplicationDbContext>(options =>
@@ -27,55 +30,53 @@ namespace TaskManagement.Tests.Integration
 
             _context = serviceProvider.GetRequiredService<ApplicationDbContext>();
 
-            // Ensure a fresh database
             _context.Database.EnsureDeleted();
             _context.Database.EnsureCreated();
 
-            _handler = new GetTaskByIdQueryHandler(_context);
+            _redisMock = new Mock<IConnectionMultiplexer>();
+            var dbMock = new Mock<IDatabase>();
+
+            dbMock.Setup(db => db.StringGetAsync(It.IsAny<RedisKey>(), It.IsAny<CommandFlags>()))
+                  .ReturnsAsync((RedisValue)RedisValue.Null);
+
+            _redisMock.Setup(r => r.GetDatabase(It.IsAny<int>(), It.IsAny<object>())).Returns(dbMock.Object);
+
+            _handler = new GetAllTasksQueryHandler(_context, _redisMock.Object);
         }
 
-        private async Task<int> SeedTestData()
+        private async Task SeedTestData()
         {
             _context.Tasks.RemoveRange(_context.Tasks);
             await _context.SaveChangesAsync();
 
-            var task = new TaskEntity
-            {
-                Title = "Sample Task",
-                Status = TaskStatus.Pending, 
-                DueDate = DateTime.UtcNow
-            };
+            _context.Tasks.AddRange(
+                new TaskEntity { Title = "Task 1", Status = TaskStatus.Pending, DueDate = DateTime.UtcNow },
+                new TaskEntity { Title = "Task 2", Status = TaskStatus.Completed, DueDate = DateTime.UtcNow }
+            );
 
-            _context.Tasks.Add(task);
             await _context.SaveChangesAsync();
-
-            return task.Id; 
         }
 
-
         [Fact]
-        public async Task Handle_ShouldReturnTask_WhenTaskExists()
+        public async Task Handle_ShouldReturnAllTasks_WhenTasksExist()
         {
-            int taskId = await SeedTestData();
+            await SeedTestData();
 
-            var result = await _handler.Handle(new GetTaskByIdQuery(taskId), CancellationToken.None);
+            var result = await _handler.Handle(new GetAllTasksQuery(), CancellationToken.None);
 
             result.Should().NotBeNull();
-            result.Id.Should().Be(taskId);
-            result.Title.Should().Be("Sample Task");
+            result.Count().Should().Be(2);
         }
 
         [Fact]
-        public async Task Handle_ShouldReturnNull_WhenTaskDoesNotExist()
+        public async Task Handle_ShouldReturnEmptyList_WhenNoTasksExist()
         {
             _context.Tasks.RemoveRange(_context.Tasks);
             await _context.SaveChangesAsync();
 
-            int nonExistentId = 999;
+            var result = await _handler.Handle(new GetAllTasksQuery(), CancellationToken.None);
 
-            var result = await _handler.Handle(new GetTaskByIdQuery(nonExistentId), CancellationToken.None);
-
-            result.Should().BeNull();
+            result.Should().BeEmpty();
         }
 
         public void Dispose()

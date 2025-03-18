@@ -5,6 +5,8 @@ using System.Threading;
 using System.Threading.Tasks;
 using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
+using Moq;
+using StackExchange.Redis;
 using TaskManagementAPI.CQRS.Queries;
 using TaskManagementAPI.CQRS.Queries.Handlers;
 using TaskManagementAPI.Data;
@@ -17,15 +19,25 @@ namespace TaskManagement.Tests.Queries
     {
         private readonly ApplicationDbContext _context;
         private readonly GetAllTasksQueryHandler _handler;
+        private readonly Mock<IConnectionMultiplexer> _redisMock;
 
         public GetAllTasksQueryHandlerTests()
         {
             var options = new DbContextOptionsBuilder<ApplicationDbContext>()
-                .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString()) 
+                .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
                 .Options;
 
             _context = new ApplicationDbContext(options);
-            _handler = new GetAllTasksQueryHandler(_context);
+
+            _redisMock = new Mock<IConnectionMultiplexer>();
+            var dbMock = new Mock<IDatabase>();
+
+            dbMock.Setup(db => db.StringGetAsync(It.IsAny<RedisKey>(), It.IsAny<CommandFlags>()))
+                  .ReturnsAsync((RedisValue)RedisValue.Null);
+
+            _redisMock.Setup(r => r.GetDatabase(It.IsAny<int>(), It.IsAny<object>())).Returns(dbMock.Object);
+
+            _handler = new GetAllTasksQueryHandler(_context, _redisMock.Object);
 
             SeedDatabase();
         }
@@ -36,10 +48,10 @@ namespace TaskManagement.Tests.Queries
             _context.Database.EnsureCreated();
 
             _context.Tasks.AddRange(new List<TaskEntity>
-    {
-        new TaskEntity { Id = 1, Title = "Task 1", Status = TaskStatus.Pending, DueDate = DateTime.UtcNow },
-        new TaskEntity { Id = 2, Title = "Task 2", Status = TaskStatus.Completed, DueDate = DateTime.UtcNow.AddDays(1) }
-    });
+            {
+                new TaskEntity { Id = 1, Title = "Task 1", Status = TaskStatus.Pending, DueDate = DateTime.UtcNow },
+                new TaskEntity { Id = 2, Title = "Task 2", Status = TaskStatus.Completed, DueDate = DateTime.UtcNow.AddDays(1) }
+            });
 
             _context.SaveChanges();
         }
@@ -67,7 +79,7 @@ namespace TaskManagement.Tests.Queries
 
         public void Dispose()
         {
-            _context.Dispose(); 
+            _context.Dispose();
         }
     }
 }

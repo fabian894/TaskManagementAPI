@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\onyedika.ezeamama\\Desktop\\project\\TaskManagementAPI\\TaskManagementAPI\\TaskManagementAPI.csproj": {}
+    "C:\\Users\\onyedika.ezeamama\\Documents\\GitHub\\TaskManagementAPI\\TaskManagementAPI\\TaskManagementAPI.csproj": {}
   },
   "projects": {
-    "C:\\Users\\onyedika.ezeamama\\Desktop\\project\\TaskManagementAPI\\TaskManagementAPI\\TaskManagementAPI.csproj": {
+    "C:\\Users\\onyedika.ezeamama\\Documents\\GitHub\\TaskManagementAPI\\TaskManagementAPI\\TaskManagementAPI.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\onyedika.ezeamama\\Desktop\\project\\TaskManagementAPI\\TaskManagementAPI\\TaskManagementAPI.csproj",
+        "projectUniqueName": "C:\\Users\\onyedika.ezeamama\\Documents\\GitHub\\TaskManagementAPI\\TaskManagementAPI\\TaskManagementAPI.csproj",
         "projectName": "TaskManagementAPI",
-        "projectPath": "C:\\Users\\onyedika.ezeamama\\Desktop\\project\\TaskManagementAPI\\TaskManagementAPI\\TaskManagementAPI.csproj",
+        "projectPath": "C:\\Users\\onyedika.ezeamama\\Documents\\GitHub\\TaskManagementAPI\\TaskManagementAPI\\TaskManagementAPI.csproj",
         "packagesPath": "C:\\Users\\onyedika.ezeamama\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\onyedika.ezeamama\\Desktop\\project\\TaskManagementAPI\\TaskManagementAPI\\obj\\",
+        "outputPath": "C:\\Users\\onyedika.ezeamama\\Documents\\GitHub\\TaskManagementAPI\\TaskManagementAPI\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages",
@@ -98,7 +98,7 @@
             },
             "Newtonsoft.Json": {
               "target": "Package",
-              "version": "[6.0.8, )"
+              "version": "[9.0.1, )"
             },
             "RabbitMQ.Client": {
               "target": "Package",

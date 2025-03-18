@@ -3,6 +3,8 @@ using System.Threading;
 using System.Threading.Tasks;
 using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
+using Moq;
+using StackExchange.Redis;
 using TaskManagementAPI.CQRS.Commands;
 using TaskManagementAPI.CQRS.Handlers;
 using TaskManagementAPI.Data;
@@ -19,13 +21,18 @@ namespace TaskManagement.Tests.Commands
         public DeleteTaskCommandHandlerTests()
         {
             var options = new DbContextOptionsBuilder<ApplicationDbContext>()
-                .UseInMemoryDatabase(databaseName: "TaskDb_" + Guid.NewGuid())  
+                .UseInMemoryDatabase(databaseName: "TaskDb_" + Guid.NewGuid())
                 .Options;
 
             _context = new ApplicationDbContext(options);
 
+            var redisMock = new Mock<IConnectionMultiplexer>();
+            var dbMock = new Mock<IDatabase>();
+            redisMock.Setup(r => r.GetDatabase(It.IsAny<int>(), It.IsAny<object>())).Returns(dbMock.Object);
+
             SeedDatabase();
-            _handler = new DeleteTaskCommandHandler(_context);
+
+            _handler = new DeleteTaskCommandHandler(_context, redisMock.Object);
         }
 
         private void SeedDatabase()
@@ -39,25 +46,25 @@ namespace TaskManagement.Tests.Commands
                 DueDate = DateTime.UtcNow.AddDays(2)
             });
 
-            _context.SaveChanges();  
+            _context.SaveChanges();
         }
 
         [Fact]
         public async Task Handle_ShouldDeleteTask_WhenTaskExists()
         {
-            var command = new DeleteTaskCommand(1);  
+            var command = new DeleteTaskCommand(1);
 
             var result = await _handler.Handle(command, CancellationToken.None);
 
             result.Should().BeTrue();
             var task = await _context.Tasks.FindAsync(1);
-            task.Should().BeNull();  
+            task.Should().BeNull();
         }
 
         [Fact]
         public async Task Handle_ShouldReturnFalse_WhenTaskDoesNotExist()
         {
-            var command = new DeleteTaskCommand(99);  
+            var command = new DeleteTaskCommand(99);
 
             var result = await _handler.Handle(command, CancellationToken.None);
 
