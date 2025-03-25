@@ -52,6 +52,12 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 
 builder.Services.AddMediatR(typeof(Program));
 
+builder.Services.AddLogging(loggingBuilder =>
+{
+    loggingBuilder.AddSerilog();
+});
+
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.

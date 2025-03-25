@@ -1,8 +1,12 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using MediatR;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Distributed;
 using Newtonsoft.Json;
+using Serilog;
 using Swashbuckle.AspNetCore.Annotations;
+using TaskManagementAPI.CQRS.Commands;
+using TaskManagementAPI.CQRS.Queries;
 using TaskManagementAPI.Data;
 using TaskManagementAPI.Models;
 
@@ -14,11 +18,13 @@ namespace TaskManagementAPI.Controllers
     {
         private readonly ApplicationDbContext _context;
         private readonly IDistributedCache _cache;
+        private readonly IMediator _mediator;
 
-        public TaskController(ApplicationDbContext context, IDistributedCache cache)
+        public TaskController(ApplicationDbContext context, IDistributedCache cache, IMediator mediator)
         {
             _context = context;
             _cache = cache;
+            _mediator = mediator;
         }
 
         /// <summary>
@@ -30,16 +36,15 @@ namespace TaskManagementAPI.Controllers
         [SwaggerOperation(Summary = "Create a new task", Description = "Adds a new task to the system.")]
         [SwaggerResponse(201, "Task created successfully", typeof(TaskEntity))]
         [SwaggerResponse(400, "Invalid task data")]
-        public async Task<IActionResult> CreateTask([FromBody] TaskEntity task)
+        public async Task<IActionResult> CreateTask([FromBody] CreateTaskCommand command, [FromServices] IMediator mediator)
         {
-            if (task == null)
+            if (command == null)
                 return BadRequest("Invalid task data.");
 
-            _context.Tasks.Add(task);
-            await _context.SaveChangesAsync();
+            var task = await mediator.Send(command);
+
             return CreatedAtAction(nameof(GetTaskById), new { id = task.Id }, task);
         }
-
         /// <summary>
         /// Retrieves all tasks.
         /// </summary>
@@ -49,8 +54,17 @@ namespace TaskManagementAPI.Controllers
         [SwaggerResponse(200, "Returns the list of tasks", typeof(IEnumerable<TaskEntity>))]
         public async Task<ActionResult<IEnumerable<TaskEntity>>> GetAllTasks()
         {
-            return await _context.Tasks.ToListAsync();
+            var query = new GetAllTasksQuery();
+            var tasks = await _mediator.Send(query);
+
+            if (tasks == null || !tasks.Any())
+            {
+                return NotFound("No tasks found.");
+            }
+
+            return Ok(tasks);
         }
+
 
         /// <summary>
         /// Retrieves a task by ID.
@@ -63,30 +77,17 @@ namespace TaskManagementAPI.Controllers
         [SwaggerResponse(404, "Task not found")]
         public async Task<IActionResult> GetTaskById(int id)
         {
-            string cacheKey = $"task_{id}";
-            string cachedTask = await _cache.GetStringAsync(cacheKey);
+            var query = new GetTaskByIdQuery(id);
+            var task = await _mediator.Send(query);
 
-            if (!string.IsNullOrEmpty(cachedTask))
-            {
-                var task = JsonConvert.DeserializeObject<TaskEntity>(cachedTask);
-                return Ok(task);
-            }
-
-            var taskFromDb = await _context.Tasks.FindAsync(id);
-
-            if (taskFromDb == null)
+            if (task == null)
             {
                 return NotFound("Task not found.");
             }
 
-            var taskJson = JsonConvert.SerializeObject(taskFromDb);
-            await _cache.SetStringAsync(cacheKey, taskJson, new DistributedCacheEntryOptions
-            {
-                AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(30)
-            });
-
-            return Ok(taskFromDb);
+            return Ok(task);
         }
+
 
         /// <summary>
         /// Updates the status of a task.
@@ -94,37 +95,27 @@ namespace TaskManagementAPI.Controllers
         /// <param name="id">The ID of the task.</param>
         /// <param name="trigger">The transition trigger.</param>
         /// <returns>The updated task status.</returns>
-        [HttpPut("{id}/status")]
-        [SwaggerOperation(Summary = "Update task status", Description = "Changes the status of an existing task.")]
-        [SwaggerResponse(200, "Task status updated successfully")]
-        [SwaggerResponse(400, "Invalid status transition")]
+        [HttpPut("{id}")]
+        [SwaggerOperation(Summary = "Update task details", Description = "Allows updating task title, description, and status while maintaining valid transitions.")]
+        [SwaggerResponse(200, "Task updated successfully")]
+        [SwaggerResponse(400, "Invalid status transition or data")]
         [SwaggerResponse(404, "Task not found")]
-        public async Task<IActionResult> UpdateTaskStatus(int id, [FromBody] int newStatus)
+        public async Task<IActionResult> UpdateTask(int id, [FromBody] UpdateTaskCommand command)
         {
-            var task = await _context.Tasks.FindAsync(id);
-            if (task == null)
+            if (id != command.Id)
+            {
+                return BadRequest("Task ID mismatch.");
+            }
+
+            var updatedTask = await _mediator.Send(command);
+
+            if (updatedTask == null)
+            {
                 return NotFound("Task not found.");
+            }
 
-            if (!Enum.IsDefined(typeof(TaskStatus), newStatus))
-                return BadRequest("Invalid status value.");
-
-            var newTaskStatus = (TaskStatus)newStatus;
-
-            TaskTrigger? trigger = null;
-
-            if (task.Status == TaskStatus.Pending && newTaskStatus == TaskStatus.InProgress)
-                trigger = TaskTrigger.Start;
-            else if (task.Status == TaskStatus.InProgress && newTaskStatus == TaskStatus.Completed)
-                trigger = TaskTrigger.Complete;
-            else
-                return BadRequest($"Invalid status transition from {task.Status} to {newTaskStatus}.");
-
-            task.MoveTo(trigger.Value);
-            await _context.SaveChangesAsync();
-
-            return Ok(new { message = $"Task moved to {task.Status}" });
+            return Ok(new { message = $"Task updated successfully. Current status: {updatedTask.Status}" });
         }
-
         /// <summary>
         /// Deletes a task by ID.
         /// </summary>
@@ -136,13 +127,15 @@ namespace TaskManagementAPI.Controllers
         [SwaggerResponse(404, "Task not found")]
         public async Task<IActionResult> DeleteTask(int id)
         {
-            var task = await _context.Tasks.FindAsync(id);
-            if (task == null)
-                return NotFound("Task not found.");
+            var command = new DeleteTaskCommand(id);
+            var result = await _mediator.Send(command);
 
-            _context.Tasks.Remove(task);
-            await _context.SaveChangesAsync();
-            return NoContent();
+            if (!result)
+            {
+                return NotFound("Task not found.");
+            }
+
+            return NoContent(); 
         }
     }
 }
