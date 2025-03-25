@@ -27,7 +27,6 @@ namespace TaskManagementAPI.CQRS.Queries.Handlers
             var cacheKey = $"task_{request.Id}";
             var cache = _redis.GetDatabase();
 
-            // Try to get the task from cache
             var cachedTask = await cache.StringGetAsync(cacheKey);
 
             if (!string.IsNullOrEmpty(cachedTask))
@@ -36,7 +35,6 @@ namespace TaskManagementAPI.CQRS.Queries.Handlers
                 return JsonConvert.DeserializeObject<TaskEntity>(cachedTask);
             }
 
-            // Task not found in cache, fetch from database
             var task = await _context.Tasks.FindAsync(request.Id);
             if (task == null)
             {

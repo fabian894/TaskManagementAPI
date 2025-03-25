@@ -35,7 +35,6 @@ namespace TaskManagementAPI.CQRS.Handlers
             _logger.LogInformation("Updating Task ID {TaskId}: Title - {Title}, Description - {Description}, Status - {Status}",
                 request.Id, request.Title, request.Description, request.Status);
 
-            // Update Title and Description if provided
             task.Title = request.Title;
             task.Description = request.Description;
             task.DueDate = request.DueDate;

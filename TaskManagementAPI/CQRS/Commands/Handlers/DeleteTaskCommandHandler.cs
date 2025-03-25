@@ -21,7 +21,6 @@ namespace TaskManagementAPI.CQRS.Handlers
 
         public async Task<bool> Handle(DeleteTaskCommand request, CancellationToken cancellationToken)
         {
-            // Fetch the task from the database
             var task = await _context.Tasks.FindAsync(request.Id);
             if (task == null)
             {
@@ -29,15 +28,12 @@ namespace TaskManagementAPI.CQRS.Handlers
                 return false;
             }
 
-            // Log task deletion attempt
             _logger.LogInformation("Attempting to delete Task ID {TaskId}: Title - {Title}, Status - {Status}",
                 task.Id, task.Title, task.Status);
 
-            // Remove the task from the database
             _context.Tasks.Remove(task);
             await _context.SaveChangesAsync();
 
-            // Log successful deletion
             _logger.LogInformation("Task ID {TaskId} deleted successfully.", task.Id);
 
             // Clear the cache
