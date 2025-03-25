@@ -9,6 +9,7 @@ using TaskManagementAPI.CQRS.Queries;
 using TaskManagementAPI.CQRS.Queries.Handlers;
 using TaskManagementAPI.Data;
 using TaskManagementAPI.Models;
+using Microsoft.Extensions.Logging;
 using Xunit;
 
 namespace TaskManagement.Tests.Queries
@@ -35,7 +36,10 @@ namespace TaskManagement.Tests.Queries
 
             _redisMock.Setup(r => r.GetDatabase(It.IsAny<int>(), It.IsAny<object>())).Returns(dbMock.Object);
 
-            _handler = new GetTaskByIdQueryHandler(_context, _redisMock.Object);
+            // Mock ILogger<GetTaskByIdQueryHandler>
+            var loggerMock = new Mock<ILogger<GetTaskByIdQueryHandler>>();
+
+            _handler = new GetTaskByIdQueryHandler(_context, _redisMock.Object, loggerMock.Object);
 
             SeedDatabase();
         }

@@ -9,6 +9,7 @@ using TaskManagementAPI.CQRS.Commands;
 using TaskManagementAPI.CQRS.Handlers;
 using TaskManagementAPI.Data;
 using TaskManagementAPI.Models;
+using Microsoft.Extensions.Logging;
 using Xunit;
 
 namespace TaskManagement.Tests.Commands
@@ -30,17 +31,21 @@ namespace TaskManagement.Tests.Commands
             var dbMock = new Mock<IDatabase>();
             redisMock.Setup(r => r.GetDatabase(It.IsAny<int>(), It.IsAny<object>())).Returns(dbMock.Object);
 
-            _handler = new UpdateTaskCommandHandler(_context, redisMock.Object); // Pass mock to the handler
+            // Mock ILogger<UpdateTaskCommandHandler>
+            var loggerMock = new Mock<ILogger<UpdateTaskCommandHandler>>();
+
+            _handler = new UpdateTaskCommandHandler(_context, redisMock.Object, loggerMock.Object);
 
             _context.Tasks.Add(new TaskEntity
             {
+                Id = 1,  
                 Title = "Existing Task",
                 Description = "Existing Description",
                 Status = TaskStatus.Pending,
                 DueDate = DateTime.UtcNow.AddDays(2)
             });
 
-            _context.SaveChanges();  
+            _context.SaveChanges();
         }
 
         [Fact]
